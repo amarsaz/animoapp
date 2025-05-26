@@ -13,8 +13,12 @@ class Tracker extends Model
         'distance',
         'zone',
     ];
-
     protected $casts = [
         'timestamp' => 'datetime',
     ];
+
+    public function getTimestampAttribute($value)
+    {
+        return \Carbon\Carbon::parse($value)->timezone('Asia/Kuala_Lumpur')->format('d-m-Y h:i:s A');
+    }
 }

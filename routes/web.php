@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\TrackerController;
+use App\Models\Tracker;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -14,9 +15,11 @@ Route::get('/about', function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
+        $tracker = Tracker::orderBy("timestamp", "desc")->get();
+        return Inertia::render('dashboard', [
+            'tracker' => $tracker
+        ]);
     })->name('dashboard');
-
 
 });
 
