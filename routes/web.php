@@ -15,11 +15,22 @@ Route::get('/about', function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
-        $tracker = Tracker::orderBy("timestamp", "desc")->get();
         return Inertia::render('dashboard', [
-            'tracker' => $tracker
+            'tracker' => []
         ]);
     })->name('dashboard');
+    // http://127.0.0.1:8000/data-visualization
+    Route::get('data-visualization', [TrackerController::class, 'index']);
+
+    Route::get('schedule', function () {
+        return Inertia::render('schedule');
+    })->name('schedule');
+
+    Route::get('info-detail', function () {
+        return Inertia::render('info-detail');
+    })->name('info-detail');
+
+    
 
 });
 

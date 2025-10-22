@@ -1,4 +1,7 @@
 import AppLayout from '@/layouts/app-layout';
+import { TotalDetectionChart } from '@/components/total-detection-chart';
+import { DetectionImage } from '@/components/detection-image';
+import Mapbox from '@/components/mapbox';
 import { usePage } from '@inertiajs/react';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
@@ -20,6 +23,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import MapboxComponent from '@/components/mapbox';
+import { useState } from 'react';
+import { DetectionDevice } from '@/components/detection-device';
+import { TrackingDevice } from '@/components/tracking-device';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -28,51 +35,66 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
+export interface Tracker {
+    timestamp: string,
+    longitude: string,
+    latitude:string,
+    distance:string,
+    zone:string
+}
+
+type PageProps = {
+  tracker: Tracker[]; // array of trackers
+};
+
 export default function Dashboard() {
-    const { props } = usePage();
+    const { props } = usePage<PageProps>();
+     const [markers, setMarkers] = useState([
+        {
+        coordinates: [103.7414, 1.4854],
+        color: '#FF0000',
+        popup: '<h3>Johor Bahru</h3><p>Lokasi pertama</p>'
+        },
+        {
+        coordinates: [103.7600, 1.4900],
+        color: '#0000FF',
+        popup: '<h3>Lokasi Kedua</h3>'
+        }
+    ]);
+
+    const handleMapLoaded = (map) => {
+        console.log('Peta dah load!', map);
+    };
+
+    const handleMarkerClick = (markerData) => {
+        console.log('Marker diklik:', markerData);
+    };
 
     const { tracker } = props;
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <AppLayout breadcrumbs={breadcrumbs} >
             <Head title="Dashboard" />
+            <h1 className="text-lg font-bold m-4">Dashboard</h1>
+            <div className="w-full grid grid-cols-3 gap-4 mx-4">
+                <TotalDetectionChart/>
+                <DetectionImage/>
+                {/* <TotalDetectionChart/> */}
+                <MapboxComponent 
+                    accessToken="pk.eyJ1IjoiYW1hcnNheiIsImEiOiJjbWdiMzljcDEwZDJtMnBwazU0N29oeDF6In0.STcvu9bAbkxnFWtglzjpiw"
+                    center={[103.7414, 1.4854]}
+                    zoom={13}
+                    markers={markers}
+                    onMapLoaded={handleMapLoaded}
+                    onMarkerClick={handleMarkerClick}
+                />
+            </div>
+            <div className="w-full grid grid-cols-3 gap-4 m-4">
+                <TotalDetectionChart/>
+                <DetectionDevice/>
+                {/* <TotalDetectionChart/> */}
+                <TrackingDevice/>
+            </div>
 
-            <Card className="m-8">
-                <CardHeader>
-                    <CardTitle>Tracker List</CardTitle>
-                    <CardDescription>List of tracker table</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <Table>
-                        <TableCaption>List of tracker</TableCaption>
-                        <TableHeader>
-                            <TableRow>
-                            <TableHead className="w-[100px]">Timestamp</TableHead>
-                            <TableHead>Longitude</TableHead>
-                            <TableHead>Latitude</TableHead>
-                            <TableHead>Distance</TableHead>
-                            <TableHead>Zone</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {tracker.map((item, index) => (
-                                <TableRow key={index}>
-                                    <TableCell className="font-medium">{item.timestamp}</TableCell>
-                                    <TableCell>{item.longitude}</TableCell>
-                                    <TableCell>{item.latitude}</TableCell>
-                                    <TableCell>{item.distance}</TableCell>
-                                    <TableCell className="text-;eft">{item.zone}</TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </CardContent>
-                {/* <CardFooter>
-                    <p>Card Footer</p>
-                </CardFooter> */}
-            </Card>
-                
-            
-            
         </AppLayout>
     );
 }

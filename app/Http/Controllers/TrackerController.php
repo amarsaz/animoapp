@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Tracker;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class TrackerController extends Controller
 {
@@ -12,11 +13,7 @@ class TrackerController extends Controller
      */
     public function index()
     {
-        $tracker = Tracker::orderBy("timestamp", "desc")->get();
-
-        return response()->json([
-            'tracker' => $tracker,
-        ]);
+        return Inertia::render('data-visualization');
     }
 
     /**
@@ -32,18 +29,18 @@ class TrackerController extends Controller
      */
     public function storeDummy(Request $request)
     {
-        $tracker = Tracker::create([
-            'timestamp' => now(),
-            'longitude' => '123.456',
-            'latitude' => '78.910',
-            'distance' => 100.00, // Example distance
-            'zone'  => 'Example Zone',
-        ]);
+        // $tracker = Tracker::create([
+        //     'timestamp' => now(),
+        //     'longitude' => '123.456',
+        //     'latitude' => '78.910',
+        //     'distance' => 100.00, // Example distance
+        //     'zone'  => 'Example Zone',
+        // ]);
 
-        return response()->json([
-            'message' => 'Dummy tracker entry created successfully.',
-            'data' => $tracker,
-        ]);
+        // return response()->json([
+        //     'message' => 'Dummy tracker entry created successfully.',
+        //     'data' => $tracker,
+        // ]);
     }
 
     /**
