@@ -31,7 +31,7 @@ export function TrackingDevice() {
                         <MapPin className="h-5 w-5 text-white" />
                     </div>                    
                     <div className="flex w-full flex-col">
-                        <h3 className="font-semibold text-sm flex-1 truncate">Biawak (Raspberry Pi)</h3>
+                        <h3 className="font-semibold text-sm flex-1 truncate">Malayan Tiger (Raspberry Pi)</h3>
                         <p className="text-xs text-muted-foreground whitespace-nowrap">2.0022476158175797, 103.32360506022891</p>
                     </div>
                     <span className="text-xs text-muted-foreground whitespace-nowrap">
@@ -48,7 +48,7 @@ export function TrackingDevice() {
                         <MapPin className="h-5 w-5 text-white" />
                     </div>                    
                     <div className="flex w-full flex-col">
-                        <h3 className="font-semibold text-sm flex-1 truncate">Tapir (Raspberry Pi Zero)</h3>
+                        <h3 className="font-semibold text-sm flex-1 truncate">Malayan Tiger (Raspberry Pi Zero)</h3>
                         <p className="text-xs text-muted-foreground whitespace-nowrap">2.0022476158175797, 103.32360506022891</p>
                     </div>
                     <span className="text-xs text-muted-foreground whitespace-nowrap">
@@ -65,7 +65,7 @@ export function TrackingDevice() {
                         <MapPin className="h-5 w-5 text-white" />
                     </div>
                     <div className="flex w-full flex-col">
-                        <h3 className="font-semibold text-sm flex-1 truncate">Ular (Raspberry Pi)</h3>
+                        <h3 className="font-semibold text-sm flex-1 truncate">Malayan Tiger (Raspberry Pi)</h3>
                         <p className="text-xs text-muted-foreground whitespace-nowrap">2.0022476158175797, 103.32360506022891</p>
                     </div>
                     <span className="text-xs text-muted-foreground whitespace-nowrap">

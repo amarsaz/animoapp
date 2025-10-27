@@ -13,15 +13,23 @@ import {
 
 export default function Mapbox({
   accessToken,
-  center = [103.7414, 1.4854], // Johor Bahru
+  center = [103.08202365213722, 1.8575466636735622] as [number, number], // Updated coordinates
   zoom = 2,
   style = 'mapbox://styles/mapbox/streets-v12',
   markers = [],
   onMapLoaded = () => {},
   onMarkerClick = () => {}
+}: {
+  accessToken: string;
+  center?: [number, number];
+  zoom?: number;
+  style?: string;
+  markers?: any[];
+  onMapLoaded?: (map: mapboxgl.Map) => void;
+  onMarkerClick?: (marker: any) => void;
 }) {
   const mapContainer = useRef(null);
-  const map = useRef(null);
+  const map = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef([]);
 
   // Initialize map
@@ -41,7 +49,9 @@ export default function Mapbox({
     map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
     map.current.on('load', () => {
-      onMapLoaded(map.current);
+      if (map.current) {
+        onMapLoaded(map.current);
+      }
     });
 
     return () => {
@@ -50,6 +60,17 @@ export default function Mapbox({
       }
     };
   }, []);
+
+  // Fly to center when center prop changes
+  useEffect(() => {
+    if (!map.current) return;
+
+    map.current.flyTo({
+      center: center,
+      zoom: zoom,
+      essential: true
+    });
+  }, [center, zoom]);
 
   // Update markers
   useEffect(() => {
@@ -82,7 +103,7 @@ export default function Mapbox({
   }, [markers]);
 
   return (
-        <Card>
+        <Card className="flex flex-col h-full">
       <CardHeader>
         <CardTitle>Latest detection</CardTitle>
         <CardDescription>
@@ -90,18 +111,14 @@ export default function Mapbox({
         </CardDescription>
       </CardHeader>
 
-      <CardContent>
-            <div 
-                ref={mapContainer} 
-                className="mapbox-container"
+      <CardContent className="flex-1 p-0 pb-6 px-6">
+            <div
+                ref={mapContainer}
+                className="mapbox-container h-full w-full rounded-lg"
                 style={{
-                    width: '100%',
-                    height: '500px',
-                    borderRadius: '8px',
-                    overflow: 'hidden'
+                    minHeight: '300px'
                 }}
             />
-        {/* <img src="https://upload.wikimedia.org/wikipedia/commons/2/2d/Makari%27s_Whiskers.jpg" alt="" /> */}
       </CardContent>
     </Card>
 

@@ -51,14 +51,19 @@ export default function Dashboard() {
     const { props } = usePage<PageProps>();
      const [markers, setMarkers] = useState([
         {
-        coordinates: [103.7414, 1.4854],
+        coordinates: [103.08202365213722, 1.8575466636735622],
         color: '#FF0000',
-        popup: '<h3>Johor Bahru</h3><p>Lokasi pertama</p>'
+        popup: '<h3>Detection Location 1</h3><p>Latest detection point</p>'
         },
         {
-        coordinates: [103.7600, 1.4900],
+        coordinates: [103.08302365213722, 1.8585466636735622],
         color: '#0000FF',
-        popup: '<h3>Lokasi Kedua</h3>'
+        popup: '<h3>Detection Location 2</h3><p>Second detection point</p>'
+        },
+        {
+        coordinates: [103.08102365213722, 1.8565466636735622],
+        color: '#800080',
+        popup: '<h3>Detection Location 3</h3><p>Third detection point</p>'
         }
     ]);
 
@@ -79,9 +84,9 @@ export default function Dashboard() {
                 <TotalDetectionChart/>
                 <DetectionImage/>
                 {/* <TotalDetectionChart/> */}
-                <MapboxComponent 
+                <MapboxComponent
                     accessToken="pk.eyJ1IjoiYW1hcnNheiIsImEiOiJjbWdiMzljcDEwZDJtMnBwazU0N29oeDF6In0.STcvu9bAbkxnFWtglzjpiw"
-                    center={[103.7414, 1.4854]}
+                    center={[103.08202365213722, 1.8575466636735622]}
                     zoom={13}
                     markers={markers}
                     onMapLoaded={handleMapLoaded}

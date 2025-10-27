@@ -25,7 +25,13 @@ export function DetectionImage() {
       </CardHeader>
 
       <CardContent>
-        <img src="https://upload.wikimedia.org/wikipedia/commons/2/2d/Makari%27s_Whiskers.jpg" alt="" />
+        <div className="relative w-full rounded-lg overflow-hidden">
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/2/2d/Makari%27s_Whiskers.jpg"
+            alt="Latest animal detection"
+            className="w-full h-full object-cover"
+          />
+        </div>
       </CardContent>
     </Card>
   )
