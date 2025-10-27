@@ -22,7 +22,8 @@ export default function Welcome() {
                 {/* Header */}
                 <header className="relative z-10 px-6 py-8 lg:px-12 lg:py-10">
                     <nav className="max-w-7xl mx-auto flex items-center justify-between">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-3">
+                            <img src="/paws.png" alt="Animo" className="h-10 w-10 lg:h-12 lg:w-12 object-contain border-2 border-white rounded-md" />
                             <span className="text-2xl lg:text-3xl font-bold text-white">Animo</span>
                         </div>
                         <div className="flex items-center gap-6">
