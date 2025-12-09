@@ -10,12 +10,18 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-    {
-        Schema::create('device_locations', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-        });
-    }
+{
+    Schema::create('device_locations', function (Blueprint $table) {
+        $table->id();
+        $table->string('device_id');
+        $table->decimal('lat', 10, 7);
+        $table->decimal('lng', 10, 7);
+        $table->string('status')->nullable(); // inside, outside
+        $table->decimal('distance_m', 8, 2)->nullable();
+        $table->timestamps();
+    });
+}
+
 
     /**
      * Reverse the migrations.
