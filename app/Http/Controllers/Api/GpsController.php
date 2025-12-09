@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 use App\Models\DeviceLocation;
 use App\Models\Geofence;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\GeofenceAlertMail;
+
 
 
 class GpsController extends Controller
@@ -57,6 +60,31 @@ class GpsController extends Controller
             $location->status = $status;
             $location->distance_m = round($distance, 2);
             $location->save();
+
+            /**
+             * ✅ REAL EXIT-ONLY GEOFENCE ALERT
+             */
+            $last = DeviceLocation::where('device_id', $data['device_id'])
+                ->latest()
+                ->skip(1)
+                ->first();
+
+            $shouldAlert = false;
+
+            if ($last && $last->status === 'inside' && $status === 'outside') {
+                $shouldAlert = true;
+            }
+
+            if ($shouldAlert) {
+                Mail::to('amarsazx@gmail.com')->send(
+                    new GeofenceAlertMail(
+                        $data['device_id'],
+                        $data['lat'],
+                        $data['lng'],
+                        round($distance, 2)
+                    )
+                );
+            }
 
             // ✅ REAL GEOFENCE ALERT (NO SPAM)
             $shouldAlert = false;
