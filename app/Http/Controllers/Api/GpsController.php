@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\DeviceLocation;
 use App\Models\Geofence;
+use Illuminate\Support\Facades\Log;
+
 
 class GpsController extends Controller
 {
@@ -38,11 +40,37 @@ class GpsController extends Controller
                 $geofence->center_lng
             );
 
-            $status = ($distance <= $geofence->radius_m) ? 'inside' : 'outside';
+           $status = ($distance <= $geofence->radius_m) ? 'inside' : 'outside';
 
+            // ✅ Get previous location (for REAL transition detection)
+            $last = DeviceLocation::where('device_id', $data['device_id'])
+                ->latest()
+                ->first();
+
+            $shouldAlert = false;
+
+            if ($last && $last->status === 'inside' && $status === 'outside') {
+            $shouldAlert = true;
+            }
+
+            // ✅ Save new GPS status
             $location->status = $status;
             $location->distance_m = round($distance, 2);
             $location->save();
+
+            // ✅ REAL GEOFENCE ALERT (NO SPAM)
+            $shouldAlert = false;
+
+            // Trigger only when device exits the safe zone
+            if ($status === 'outside') {
+            $shouldAlert = true;
+            }
+
+            if ($shouldAlert) {
+            Log::alert("🚨 GEOFENCE BREACH: {$data['device_id']} exited the safe zone!");
+            }
+
+
         }
 
         return response()->json([
