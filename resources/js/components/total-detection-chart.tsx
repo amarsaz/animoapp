@@ -11,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+
 import {
   ChartConfig,
   ChartContainer,
@@ -18,73 +19,67 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart"
 
-export const description = "A simple area chart"
-
-const chartData = [
-  { month: "January", desktop: 186 },
-  { month: "February", desktop: 305 },
-  { month: "March", desktop: 237 },
-  { month: "April", desktop: 73 },
-  { month: "May", desktop: 209 },
-  { month: "June", desktop: 214 },
-]
+type ChartData = {
+  name: string
+  total: number
+}
 
 const chartConfig = {
-  desktop: {
-    label: "Desktop",
+  total: {
+    label: "Total Detections",
     color: "var(--chart-1)",
   },
 } satisfies ChartConfig
 
-export function TotalDetectionChart() {
+export function TotalDetectionChart({ data }: { data: ChartData[] }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Area Chart</CardTitle>
+        <CardTitle>Animal Detection Trend</CardTitle>
         <CardDescription>
-          Showing total visitors for the last 6 months
+          Monthly detection frequency (GPS devices)
         </CardDescription>
       </CardHeader>
+
       <CardContent>
         <ChartContainer config={chartConfig}>
           <AreaChart
-            accessibilityLayer
-            data={chartData}
-            margin={{
-              left: 12,
-              right: 12,
-            }}
+            data={data}
+            margin={{ left: 12, right: 12 }}
           >
             <CartesianGrid vertical={false} />
+
             <XAxis
-              dataKey="month"
+              dataKey="name"
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              tickFormatter={(value) => value.slice(0, 3)}
             />
+
             <ChartTooltip
               cursor={false}
               content={<ChartTooltipContent indicator="line" />}
             />
+
             <Area
-              dataKey="desktop"
+              dataKey="total"
               type="natural"
-              fill="var(--color-desktop)"
+              fill="var(--color-total)"
               fillOpacity={0.4}
-              stroke="var(--color-desktop)"
+              stroke="var(--color-total)"
             />
           </AreaChart>
         </ChartContainer>
       </CardContent>
+
       <CardFooter>
         <div className="flex w-full items-start gap-2 text-sm">
           <div className="grid gap-2">
             <div className="flex items-center gap-2 leading-none font-medium">
-              Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
+              Monthly tracking trend <TrendingUp className="h-4 w-4" />
             </div>
             <div className="text-muted-foreground flex items-center gap-2 leading-none">
-              January - June 2024
+              Based on real GPS device data
             </div>
           </div>
         </div>
