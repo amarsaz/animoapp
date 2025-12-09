@@ -13,57 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { BarChart3, MapPin, Activity, Clock } from 'lucide-react';
 import Mapbox from '@/components/mapbox';
-
-const trackingData = [
-    {
-        id: 1,
-        deviceId: "DEV-001",
-        animalName: "Malayan Tiger",
-        latitude: 1.8575466636735622,
-        longitude: 103.08202365213722,
-        date: '29 Oct 2025',
-        time: '10:00 AM',
-        status: 'Active',
-        battery: '85%',
-        signalStrength: 'Strong'
-    },
-    {
-        id: 2,
-        deviceId: "DEV-002",
-        animalName: "Asian Elephant",
-        latitude: 1.8585466636735622,
-        longitude: 103.08302365213722,
-        date: '27 Oct 2025',
-        time: '11:15 AM',
-        status: 'Active',
-        battery: '92%',
-        signalStrength: 'Strong'
-    },
-    {
-        id: 3,
-        deviceId: "DEV-003",
-        animalName: "Sun Bear",
-        latitude: 1.8565466636735622,
-        longitude: 103.08102365213722,
-        date: '27 Oct 2025',
-        time: '09:45 AM',
-        status: 'Active',
-        battery: '78%',
-        signalStrength: 'Medium'
-    },
-    {
-        id: 4,
-        deviceId: "DEV-004",
-        animalName: "Clouded Leopard",
-        latitude: 1.8555466636735622,
-        longitude: 103.08252365213722,
-        date: '27 Oct 2025',
-        time: '11:50 PM',
-        status: 'Inactive',
-        battery: '45%',
-        signalStrength: 'Weak'
-    },
-]
+import { usePage } from '@inertiajs/react';
 
 // Detection frequency data for visualization
 const detectionStats = [
@@ -88,14 +38,16 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function DataVisualization() {
+    const { trackingData } = usePage().props;
     // Prepare markers for the map
-    const markers = trackingData
-        .filter(data => data.status === 'Active')
+    const markers = (trackingData || [])
+        (trackingData || []).filter(data => data.status === 'Active')
         .map(data => ({
             coordinates: [data.longitude, data.latitude],
             color: data.status === 'Active' ? '#22c55e' : '#ef4444',
             popup: `<h3>${data.animalName}</h3><p>Device: ${data.deviceId}</p><p>Last seen: ${data.date} ${data.time}</p>`
         }));
+
 
     const maxCount = Math.max(...detectionStats.map(d => d.count));
 
