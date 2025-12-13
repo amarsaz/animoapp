@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Tracker;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Models\TrackingGps;
 
 class TrackerController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Show GPS tracking visualization page.
      */
     public function index()
     {
@@ -17,53 +17,31 @@ class TrackerController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Store GPS tracking data coming from Raspberry Pi.
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'tracking_device_id' => 'required',
+            'longitude' => 'required|numeric',
+            'latitude' => 'required|numeric',
+        ]);
+
+        TrackingGps::create([
+            'tracking_device_id' => $request->tracking_device_id,
+            'longitude' => $request->longitude,
+            'latitude' => $request->latitude,
+            'timestamp' => now(),
+        ]);
+
+        return response()->json(['status' => 'success']);
     }
 
     /**
-     * Store a dummy tracker entry.
+     * Fetch all GPS tracking data (for the map)
      */
-    public function storeDummy(Request $request)
+    public function fetch()
     {
-        // $tracker = Tracker::create([
-        //     'timestamp' => now(),
-        //     'longitude' => '123.456',
-        //     'latitude' => '78.910',
-        //     'distance' => 100.00, // Example distance
-        //     'zone'  => 'Example Zone',
-        // ]);
-
-        // return response()->json([
-        //     'message' => 'Dummy tracker entry created successfully.',
-        //     'data' => $tracker,
-        // ]);
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Tracker $tracker)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Tracker $tracker)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Tracker $tracker)
-    {
-        //
+        return TrackingGps::orderBy('timestamp', 'desc')->get();
     }
 }
