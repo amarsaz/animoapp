@@ -36,4 +36,37 @@ class CameraController extends Controller
             'timestamp' => $latest->created_at,
         ]);
     }
+
+    // Activity schedule logic (count detections)
+    public function activityLevels()
+    {
+        $animals = ['tiger', 'elephant', 'orang utan'];
+
+        $result = [];
+
+        foreach ($animals as $animal) {
+            $count = Detection::where('animal', $animal)
+                ->where('created_at', '>=', now()->subDays(7))
+                ->count();
+
+            if ($count <= 2) {
+                $level = 'Low';
+                $color = 'green';
+            } elseif ($count <= 4) {
+                $level = 'Medium';
+                $color = 'yellow';
+            } else {
+                $level = 'High';
+                $color = 'red';
+            }
+
+            $result[$animal] = [
+                'count' => $count,
+                'level' => $level,
+                'color' => $color,
+            ];
+        }
+
+        return response()->json($result);
+    }
 }

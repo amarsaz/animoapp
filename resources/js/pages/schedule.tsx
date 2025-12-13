@@ -1,162 +1,231 @@
-import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/react';
-import { Clock, TrendingUp, Activity, Moon, Sun } from 'lucide-react';
+"use client";
+
+import AppLayout from "@/layouts/app-layout";
+import { type BreadcrumbItem } from "@/types";
+import { Head } from "@inertiajs/react";
+import { Clock, TrendingUp, Activity, Sun, Moon } from "lucide-react";
+import { useEffect, useState } from "react";
+
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
+// -----------------------------------------------------------------------------
+// Breadcrumbs
+// -----------------------------------------------------------------------------
 const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Dashboard',
-        href: '/dashboard',
-    },
-    {
-        title: 'Schedule',
-        href: '/schedule',
-    },
+  { title: "Dashboard", href: "/dashboard" },
+  { title: "Schedule", href: "/schedule" },
 ];
 
-const scheduleData = [
-    {
-        name: "MALAYAN TIGER",
-        behavior: "Hunting and territorial patrol",
-        activityTag: "High Activity",
-        confidence: "95% Confidence",
-        peakHours: [
-            { icon: Moon, time: "22:00-02:00" },
-            { icon: Moon, time: "05:00-07:00" }
-        ],
-        seasonalPattern: "Year-round",
-        activityLevel: 95,
-        activityLabel: "High"
-    },
-    {
-        name: "ASIAN ELEPHANT",
-        behavior: "Foraging and social interaction",
-        activityTag: "High Activity",
-        confidence: "92% Confidence",
-        peakHours: [
-            { icon: Sun, time: "06:00-10:00" },
-            { icon: Sun, time: "16:00-20:00" }
-        ],
-        seasonalPattern: "Dry season peak",
-        activityLevel: 92,
-        activityLabel: "High"
-    },
-    {
-        name: "SUN BEAR",
-        behavior: "Feeding and territory marking",
-        activityTag: "Medium Activity",
-        confidence: "88% Confidence",
-        peakHours: [
-            { icon: Sun, time: "07:00-11:00" },
-            { icon: Moon, time: "18:00-21:00" }
-        ],
-        seasonalPattern: "Fruit season peak",
-        activityLevel: 70,
-        activityLabel: "Medium"
-    },
-    {
-        name: "CLOUDED LEOPARD",
-        behavior: "Nocturnal hunting",
-        activityTag: "High Activity",
-        confidence: "90% Confidence",
-        peakHours: [
-            { icon: Moon, time: "20:00-23:00" },
-            { icon: Moon, time: "03:00-06:00" }
-        ],
-        seasonalPattern: "Year-round",
-        activityLevel: 88,
-        activityLabel: "High"
-    }
-];
+// -----------------------------------------------------------------------------
+// BASE STATIC DATA
+// -----------------------------------------------------------------------------
+const BASE_DATA = {
+  tiger: {
+    name: "MALAYAN TIGER",
+    behavior: "Hunting and territorial patrol",
+    peakHours: [
+      { icon: Moon, time: "22:00–02:00" },
+      { icon: Moon, time: "05:00–07:00" },
+    ],
+    seasonalPattern: "Year-round",
+  },
 
+  elephant: {
+    name: "ASIAN ELEPHANT",
+    behavior: "Foraging and social interaction",
+    peakHours: [
+      { icon: Sun, time: "06:00–10:00" },
+      { icon: Sun, time: "16:00–20:00" },
+    ],
+    seasonalPattern: "Dry season peak",
+  },
+
+  "orang utan": {
+    name: "ORANG UTAN",
+    behavior: "Feeding and tree movement",
+    peakHours: [
+      { icon: Sun, time: "07:00–11:00" },
+      { icon: Moon, time: "18:00–21:00" },
+    ],
+    seasonalPattern: "Fruit season peak",
+  },
+} as const;
+
+type AnimalKey = keyof typeof BASE_DATA;
+
+// -----------------------------------------------------------------------------
+// Component
+// -----------------------------------------------------------------------------
 export default function Schedule() {
-    return (
-        <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Activity Schedule" />
+  const [levels, setLevels] = useState<
+    Record<
+      AnimalKey,
+      {
+        count: number;
+        level: string;
+        color: string;
+        confidence: number | null;
+        timestamp: string | null;
+      } | undefined
+    >
+  >({
+    tiger: undefined,
+    elephant: undefined,
+    "orang utan": undefined,
+  });
 
-            <div className="p-8">
-                <div className="mb-6">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">Activity Schedule</h1>
-                    <p className="text-gray-600">Animal behavior patterns and peak activity times</p>
-                </div>
+  // Fetch activity levels from backend
+  useEffect(() => {
+    fetch("/api/activity-levels")
+      .then((res) => res.json())
+      .then((data) => setLevels(data))
+      .catch((err) => console.error("Failed to fetch activity levels:", err));
+  }, []);
 
-                <div className="space-y-4">
-                    {scheduleData.map((animal, index) => (
-                        <Card key={index} className="border-2 border-blue-200 hover:border-blue-400 transition-colors">
-                            <CardHeader>
-                                <div className="flex items-start justify-between">
-                                    <div>
-                                        <CardTitle className="text-xl font-bold text-gray-900">
-                                            {animal.name}
-                                        </CardTitle>
-                                        <CardDescription className="text-sm text-gray-600 mt-1">
-                                            {animal.behavior}
-                                        </CardDescription>
-                                    </div>
-                                    <div className="flex gap-2">
-                                        <Badge className="bg-green-100 text-green-700 hover:bg-green-200 border-green-300">
-                                            {animal.activityTag}
-                                        </Badge>
-                                        <Badge variant="outline" className="border-gray-300">
-                                            {animal.confidence}
-                                        </Badge>
-                                    </div>
-                                </div>
-                            </CardHeader>
+  // Level → bar percentage
+  const levelToValue = (level?: string) => {
+    if (!level) return 0;
+    if (level === "Low") return 30;
+    if (level === "Medium") return 60;
+    if (level === "High") return 90;
+    return 0;
+  };
 
-                            <CardContent>
-                                <div className="grid grid-cols-3 gap-8">
-                                    {/* Peak Activity Hours */}
-                                    <div>
-                                        <div className="flex items-center gap-2 mb-3">
-                                            <Clock className="h-5 w-5 text-gray-700" />
-                                            <h3 className="font-semibold text-gray-900">Peak Activity Hours</h3>
-                                        </div>
-                                        <div className="space-y-2">
-                                            {animal.peakHours.map((hour, idx) => (
-                                                <div key={idx} className="flex items-center gap-2 text-gray-700">
-                                                    <hour.icon className="h-4 w-4" />
-                                                    <span>{hour.time}</span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
+  // Level → color
+  const colorToClass = (color?: string) => {
+    switch (color) {
+      case "green":
+        return "bg-green-500";
+      case "yellow":
+        return "bg-yellow-500";
+      case "red":
+        return "bg-red-500";
+      default:
+        return "bg-gray-400";
+    }
+  };
 
-                                    {/* Seasonal Pattern */}
-                                    <div>
-                                        <div className="flex items-center gap-2 mb-3">
-                                            <TrendingUp className="h-5 w-5 text-gray-700" />
-                                            <h3 className="font-semibold text-gray-900">Seasonal Pattern</h3>
-                                        </div>
-                                        <p className="text-gray-700">{animal.seasonalPattern}</p>
-                                    </div>
+  return (
+    <AppLayout breadcrumbs={breadcrumbs}>
+      <Head title="Activity Schedule" />
 
-                                    {/* Activity Level */}
-                                    <div>
-                                        <div className="flex items-center gap-2 mb-3">
-                                            <Activity className="h-5 w-5 text-gray-700" />
-                                            <h3 className="font-semibold text-gray-900">Activity Level</h3>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Progress value={animal.activityLevel} className="h-2" />
-                                            <p className="text-sm text-gray-700 text-right">{animal.activityLabel}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
-            </div>
-        </AppLayout>
-    );
+      <div className="p-8">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Activity Schedule
+          </h1>
+          <p className="text-gray-600">
+            Animal behavior patterns and peak activity times
+          </p>
+        </div>
+
+        <div className="space-y-4">
+          {(Object.keys(BASE_DATA) as AnimalKey[]).map((key) => {
+            const data = BASE_DATA[key];
+            const live = levels[key];
+
+            return (
+              <Card
+                key={key}
+                className="border-2 border-blue-200 hover:border-blue-400 transition-colors"
+              >
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <CardTitle className="text-xl font-bold text-gray-900">
+                        {data.name}
+                      </CardTitle>
+                      <CardDescription className="text-sm text-gray-600 mt-1">
+                        {data.behavior}
+                      </CardDescription>
+                    </div>
+
+                    {/* ⭐ Activity Level + Confidence Display ⭐ */}
+                    <div className="flex gap-2">
+                      <Badge className={colorToClass(live?.color) + " text-white"}>
+                        {live?.level || "Loading..."}
+                      </Badge>
+
+                      <Badge variant="outline" className="border-gray-300">
+                        {live?.confidence !== null && live?.confidence !== undefined
+                          ? `${live.confidence}% Confidence`
+                          : "Waiting..."}
+                      </Badge>
+                    </div>
+                  </div>
+                </CardHeader>
+
+                <CardContent>
+                  <div className="grid grid-cols-3 gap-8">
+                    {/* Peak Activity Hours */}
+                    <div>
+                      <div className="flex items-center gap-2 mb-3">
+                        <Clock className="h-5 w-5 text-gray-700" />
+                        <h3 className="font-semibold text-gray-900">
+                          Peak Activity Hours
+                        </h3>
+                      </div>
+
+                      <div className="space-y-2">
+                        {data.peakHours.map((ph, idx) => (
+                          <div key={idx} className="flex items-center gap-2 text-gray-700">
+                            <ph.icon className="h-4 w-4" />
+                            <span>{ph.time}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Seasonal Pattern */}
+                    <div>
+                      <div className="flex items-center gap-2 mb-3">
+                        <TrendingUp className="h-5 w-5 text-gray-700" />
+                        <h3 className="font-semibold text-gray-900">Seasonal Pattern</h3>
+                      </div>
+                      <p className="text-gray-700">{data.seasonalPattern}</p>
+                    </div>
+
+                    {/* ⭐ Dynamic Activity Level Bar ⭐ */}
+                    <div>
+                      <div className="flex items-center gap-2 mb-3">
+                        <Activity className="h-5 w-5 text-gray-700" />
+                        <h3 className="font-semibold text-gray-900">Activity Level</h3>
+                      </div>
+
+                      <div className="w-full h-2 bg-gray-200 rounded relative overflow-hidden">
+                        <div
+                          className={`h-full rounded transition-all duration-500 ${colorToClass(
+                            live?.color
+                          )}`}
+                          style={{ width: `${levelToValue(live?.level)}%` }}
+                        />
+                      </div>
+
+                      <p className="text-right text-sm text-gray-700 mt-1">
+                        {live?.level || "Loading..."}
+                      </p>
+
+                      {/* Optional timestamp */}
+                      {live?.timestamp && (
+                        <p className="text-xs text-gray-500 text-right mt-1">
+                          Last seen: {new Date(live.timestamp).toLocaleString()}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      </div>
+    </AppLayout>
+  );
 }
