@@ -29,12 +29,12 @@ class CameraController extends Controller
             'image_path' => $path,
         ]);
 
-        // Email triggers
-        $alertAnimals = ['tiger', 'elephant', 'orang utan'];
+        // // Email triggers
+        // $alertAnimals = ['tiger', 'elephant', 'orang utan'];
 
-        if (in_array($detection->animal, $alertAnimals)) {
-            Mail::to('amarsazx@gmail.com')->send(new AnimalDetectedAlert($detection));
-        }
+        // if (in_array($detection->animal, $alertAnimals)) {
+        //     Mail::to('amarsazx@gmail.com')->send(new AnimalDetectedAlert($detection));
+        // }
 
         return response()->json(['success' => true]);
     }

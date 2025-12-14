@@ -43,9 +43,8 @@ Route::post('/api/tracker', [TrackerController::class, 'store']);
 Route::get('/api/tracker/store-dummy', [TrackerController::class, 'storeDummy']);
 
 Route::post('/gps', [GpsController::class, 'store']);
-Route::get('/data-visualization', [DataVisualizationController::class, 'index']);
 
-Route::post('/camera/detection', [CameraController::class, 'store']);
+Route::get('/camera/detection', [CameraController::class, 'store']);
 Route::get('/camera/latest', [CameraController::class, 'latest']);
 
 require __DIR__ . '/settings.php';
