@@ -2,8 +2,12 @@
 
 use App\Http\Controllers\TrackerController;
 use App\Models\Tracker;
-use Illuminate\Support\Facades\Route;
+
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\GpsController;
+use App\Http\Controllers\Api\DataVisualizationController;
+use App\Http\Controllers\Api\CameraController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -38,6 +42,11 @@ Route::get('/api/tracker', [TrackerController::class, 'index']);
 Route::post('/api/tracker', [TrackerController::class, 'store']);
 Route::get('/api/tracker/store-dummy', [TrackerController::class, 'storeDummy']);
 
+Route::post('/gps', [GpsController::class, 'store']);
+Route::get('/data-visualization', [DataVisualizationController::class, 'index']);
+
+Route::post('/camera/detection', [CameraController::class, 'store']);
+Route::get('/camera/latest', [CameraController::class, 'latest']);
 
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';
