@@ -61,10 +61,26 @@ export default function Dashboard() {
       popup: 'PI-001',
     },
   ]);
+  const defaultCoordinates = { lng: 103.3687762, lat: 1.9893272 };
+
   const loadDeviceCoordinate = async () => {
     try {
       const res = await axios.get('/api/gps/coordinate/PI-001');
       const data = res.data;
+
+      // Check if response is empty or missing required fields
+      if (!data || Object.keys(data).length === 0 || !data.lng || !data.lat) {
+        console.warn('Empty or invalid response, using fallback coordinates');
+        setDeviceCoordinate(null);
+        setMarkers([
+          {
+            coordinates: [defaultCoordinates.lng, defaultCoordinates.lat],
+            color: '#808080',
+            popup: 'PI-001 (No data available)',
+          },
+        ]);
+        return;
+      }
 
       // 1. Update deviceCoordinate state
       setDeviceCoordinate(data);
@@ -82,14 +98,23 @@ export default function Dashboard() {
       ]);
 
     } catch (error) {
-      console.error('Failed to fetch latest detection:', error);
+      console.error('Failed to fetch device coordinate:', error);
+      // Fallback on error
+      setDeviceCoordinate(null);
+      setMarkers([
+        {
+          coordinates: [defaultCoordinates.lng, defaultCoordinates.lat],
+          color: '#808080',
+          popup: 'PI-001 (Connection error)',
+        },
+      ]);
     }
   };
 
-  // ⭐ Auto-refresh every 2 minutes
+  // ⭐ Auto-refresh every 10 seconds
   useEffect(() => {
     // loadLatest();
-    loadDeviceCoordinate()
+    loadDeviceCoordinate();
     const interval = setInterval(loadDeviceCoordinate, 10000);
     return () => clearInterval(interval);
   }, []);
