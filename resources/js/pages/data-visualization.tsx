@@ -1,6 +1,8 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 import {
   Table,
   TableBody,
@@ -54,16 +56,64 @@ export default function DataVisualization() {
   // 👇 tell Inertia what props we expect
   const { trackingData } = usePage<{ trackingData: TrackingItem[] }>().props;
 
-  // Prepare markers for the map
-  const markers = 
-    trackingData.filter((data) => data.status === 'Active')
-    .map((data) => ({
-      coordinates: [data.longitude, data.latitude] as [number, number],
-      color: data.status === 'Active' ? '#22c55e' : '#ef4444',
-      popup: `<h3>${data.animalName}</h3>
-              <p>Device: ${data.deviceId}</p>
-              <p>Last seen: ${data.date} ${data.time}</p>`,
-    }));
+  const defaultCoordinates = { lng: 103.3687762, lat: 1.9893272 };
+
+  // Device coordinate state
+  const [markers, setMarkers] = useState([
+    {
+      coordinates: [defaultCoordinates.lng, defaultCoordinates.lat] as [number, number],
+      color: '#FF0000',
+      popup: 'PI-001',
+    },
+  ]);
+
+  const loadDeviceCoordinate = async () => {
+    try {
+      const res = await axios.get('/api/gps/coordinate/PI-001');
+      const data = res.data;
+
+      // Check if response is empty or missing required fields
+      if (!data || Object.keys(data).length === 0 || !data.lng || !data.lat) {
+        console.warn('Empty or invalid response, using fallback coordinates');
+        setMarkers([
+          {
+            coordinates: [defaultCoordinates.lng, defaultCoordinates.lat] as [number, number],
+            color: '#808080',
+            popup: 'PI-001 (No data available)',
+          },
+        ]);
+        return;
+      }
+
+      setMarkers([
+        {
+          coordinates: [Number(data.lng), Number(data.lat)] as [number, number],
+          color: '#FF0000',
+          popup: `
+            <strong>Device:</strong> ${data.device_id}<br/>
+            <strong>Time:</strong> ${new Date(data.created_at).toLocaleString()}
+          `,
+        },
+      ]);
+
+    } catch (error) {
+      console.error('Failed to fetch device coordinate:', error);
+      setMarkers([
+        {
+          coordinates: [defaultCoordinates.lng, defaultCoordinates.lat] as [number, number],
+          color: '#808080',
+          popup: 'PI-001 (Connection error)',
+        },
+      ]);
+    }
+  };
+
+  // Auto-refresh every 10 seconds
+  useEffect(() => {
+    loadDeviceCoordinate();
+    const interval = setInterval(loadDeviceCoordinate, 10000);
+    return () => clearInterval(interval);
+  }, []);
 
   const maxCount = Math.max(...detectionStats.map((d) => d.count));
 
@@ -133,7 +183,11 @@ export default function DataVisualization() {
           {/* Detection Map */}
           <Mapbox
             accessToken="pk.eyJ1IjoiYW1hcnNheiIsImEiOiJjbWdiMzljcDEwZDJtMnBwazU0N29oeDF6In0.STcvu9bAbkxnFWtglzjpiw"
-            center={[103.08202365213722, 1.8575466636735622]}
+            center={
+              markers.length > 0
+                ? markers[0].coordinates
+                : [defaultCoordinates.lng, defaultCoordinates.lat]
+            }
             zoom={13}
             markers={markers}
           />
