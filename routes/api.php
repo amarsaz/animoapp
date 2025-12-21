@@ -13,7 +13,7 @@ Route::get('/', function () {
 
 // localhost:8000/api/camera/latest
 Route::prefix('gps')->group(function() {
-    Route::get('/latest', [GpsController::class, 'showLatestCoordinate']);
+    Route::get('/coordinate/{id}', [GpsController::class, 'getDeviceLatestCoordinate']);
     Route::post('/update-coordinate', [GpsController::class, 'store']);
 });
 

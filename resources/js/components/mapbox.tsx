@@ -28,79 +28,79 @@ export default function Mapbox({
   onMapLoaded?: (map: mapboxgl.Map) => void;
   onMarkerClick?: (marker: any) => void;
 }) {
-  const mapContainer = useRef(null);
+  const mapContainer = useRef<HTMLDivElement | null>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef([]);
 
-  // // Initialize map
-  // useEffect(() => {
-  //   if (map.current) return; // Initialize only once
+  // Initialize map
+  useEffect(() => {
+    if (map.current) return; // Initialize only once
 
-  //   mapboxgl.accessToken = accessToken;
+    mapboxgl.accessToken = accessToken;
 
-  //   map.current = new mapboxgl.Map({
-  //     container: mapContainer,
-  //     style: style,
-  //     center: center,
-  //     zoom: zoom
-  //   });
+    map.current = new mapboxgl.Map({
+      container: mapContainer.current,
+      style: style,
+      center: center,
+      zoom: zoom
+    });
 
-  //   // Add navigation controls
-  //   map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+    // Add navigation controls
+    map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
-  //   map.current.on('load', () => {
-  //     if (map.current) {
-  //       onMapLoaded(map.current);
-  //     }
-  //   });
+    map.current.on('load', () => {
+      if (map.current) {
+        onMapLoaded(map.current);
+      }
+    });
 
-  //   return () => {
-  //     if (map.current) {
-  //       map.current.remove();
-  //     }
-  //   };
-  // }, []);
+    return () => {
+      if (map.current) {
+        map.current.remove();
+      }
+    };
+  }, []);
 
-  // // Fly to center when center prop changes
-  // useEffect(() => {
-  //   if (!map.current) return;
+  // Fly to center when center prop changes
+  useEffect(() => {
+    if (!map.current) return;
 
-  //   map.current.flyTo({
-  //     center: center,
-  //     zoom: zoom,
-  //     essential: true
-  //   });
-  // }, [center, zoom]);
+    map.current.flyTo({
+      center: center,
+      zoom: zoom,
+      essential: true
+    });
+  }, [center, zoom]);
 
-  // // Update markers
-  // useEffect(() => {
-  //   if (!map.current) return;
+  // Update markers
+  useEffect(() => {
+    if (!map.current) return;
 
-  //   // Clear existing markers
-  //   markersRef.current.forEach(marker => marker.remove());
-  //   markersRef.current = [];
+    // Clear existing markers
+    markersRef.current.forEach(marker => marker.remove());
+    markersRef.current = [];
 
-  //   // Add new markers
-  //   markers.forEach((markerData) => {
-  //     const marker = new mapboxgl.Marker({
-  //       color: markerData.color || '#FF0000'
-  //     })
-  //       .setLngLat(markerData.coordinates)
-  //       .addTo(map.current);
+    // Add new markers
+    markers.forEach((markerData) => {
+      const marker = new mapboxgl.Marker({
+        color: markerData.color || '#FF0000'
+      })
+        .setLngLat(markerData.coordinates)
+        .addTo(map.current);
 
-  //     if (markerData.popup) {
-  //       const popup = new mapboxgl.Popup({ offset: 25 })
-  //         .setHTML(markerData.popup);
-  //       marker.setPopup(popup);
-  //     }
+      if (markerData.popup) {
+        const popup = new mapboxgl.Popup({ offset: 25 })
+          .setHTML(markerData.popup);
+        marker.setPopup(popup);
+      }
 
-  //     marker.getElement().addEventListener('click', () => {
-  //       onMarkerClick(markerData);
-  //     });
+      marker.getElement().addEventListener('click', () => {
+        onMarkerClick(markerData);
+      });
 
-  //     markersRef.current.push(marker);
-  //   });
-  // }, [markers]);
+      markersRef.current.push(marker);
+    });
+  }, [markers]);
 
   return (
         <Card className="flex flex-col h-full">

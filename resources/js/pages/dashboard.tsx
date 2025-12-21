@@ -29,29 +29,21 @@ export default function Dashboard() {
     total: item.count,
   }));
 
-  // 📌 Mapbox dummy markers (OK to keep)
-  const [markers] = useState([
-    {
-      coordinates: [103.08202365213722, 1.8575466636735622],
-      color: '#FF0000',
-      popup: '<h3>Detection Location 1</h3><p>Latest detection point</p>',
-    },
-    {
-      coordinates: [103.08302365213722, 1.8585466636735622],
-      color: '#0000FF',
-      popup: '<h3>Detection Location 2</h3><p>Second detection point</p>',
-    },
-    {
-      coordinates: [103.08102365213722, 1.8565466636735622],
-      color: '#800080',
-      popup: '<h3>Detection Location 3</h3><p>Third detection point</p>',
-    },
-  ]);
+
 
   // ⭐ LIVE DETECTION STATE
   const [latest, setLatest] = useState<{
     animal: string;
     timestamp: string;
+  } | null>(null);
+
+  // ⭐ LIVE DETECTION STATE
+  const [deviceCoordinate, setDeviceCoordinate] = useState<{
+    id: number;
+    device_id: string;
+    lat: string;
+    lng: string;
+    created_at: string;
   } | null>(null);
 
   // ⭐ Static image mapping (match YOLO names EXACTLY)
@@ -61,11 +53,34 @@ export default function Dashboard() {
     'tiger': '/images/animals/tiger.jpeg',
   };
 
-  // ⭐ API call: get latest detection
-  const loadLatest = async () => {
+  // 📌 Mapbox dummy markers (OK to keep)
+  const [markers, setMarkers] = useState([
+    {
+      coordinates: [103.3687762, 1.9893272],
+      color: '#FF0000',
+      popup: 'PI-001',
+    },
+  ]);
+  const loadDeviceCoordinate = async () => {
     try {
-      const res = await axios.get('/api/camera/latest');
-      setLatest(res.data);
+      const res = await axios.get('/api/gps/coordinate/PI-001');
+      const data = res.data;
+
+      // 1. Update deviceCoordinate state
+      setDeviceCoordinate(data);
+
+      // 2. Update markers state (Mapbox needs [lng, lat] as numbers)
+      setMarkers([
+        {
+          coordinates: [Number(data.lng), Number(data.lat)],
+          color: '#FF0000',
+          popup: `
+            <strong>Device:</strong> ${data.device_id}<br/>
+            <strong>Time:</strong> ${new Date(data.created_at).toLocaleString()}
+          `,
+        },
+      ]);
+
     } catch (error) {
       console.error('Failed to fetch latest detection:', error);
     }
@@ -73,8 +88,9 @@ export default function Dashboard() {
 
   // ⭐ Auto-refresh every 2 minutes
   useEffect(() => {
-    loadLatest();
-    const interval = setInterval(loadLatest, 120000);
+    // loadLatest();
+    loadDeviceCoordinate()
+    const interval = setInterval(loadDeviceCoordinate, 10000);
     return () => clearInterval(interval);
   }, []);
 
@@ -83,7 +99,7 @@ export default function Dashboard() {
       <Head title="Dashboard" />
 
       <h1 className="text-lg font-bold m-4">Dashboard</h1>
-
+=
       {/* ⭐ TOP ROW */}
       <div className="w-full grid grid-cols-3 gap-4 mx-4">
         {/* Area Chart */}
@@ -115,7 +131,11 @@ export default function Dashboard() {
         {/* Mapbox */}
         <MapboxComponent
           accessToken="pk.eyJ1IjoiYW1hcnNheiIsImEiOiJjbWdiMzljcDEwZDJtMnBwazU0N29oeDF6In0.STcvu9bAbkxnFWtglzjpiw"
-          center={[103.08202365213722, 1.8575466636735622]}
+          center={
+            markers.length > 0
+              ? markers[0].coordinates
+              : [103.08202365213722, 1.8575466636735622]
+          }
           zoom={13}
           markers={markers}
         />
@@ -128,7 +148,6 @@ export default function Dashboard() {
         {/* ⭐ Detection Device Card */}
         <div className="p-4 bg-white shadow rounded-xl border">
           <h2 className="font-semibold text-lg">Detection Device</h2>
-
           {latest ? (
             <div className="flex items-center gap-4 mt-3">
               <img

@@ -14,15 +14,14 @@ use App\Mail\GeofenceAlertMail;
 
 class GpsController extends Controller
 {
-    public function showLatestCoordinate(Request $request)
-    {
-        $deviceId = $request->device_id;
+    public function getDeviceLatestCoordinate($id)
+    {        
+        $latestLocation = DeviceLocation::where('device_id', $id)
+            ->latest('created_at')
+            ->first();
 
-        $deviceLocations = DeviceLocation::where('device_id', $deviceId)
-            ->orderBy('created_at' , 'desc')
-            ->get();
-        
-        return response()->json($deviceLocations);
+                    
+        return response()->json($latestLocation);
     }
 
     public function store(Request $request)
