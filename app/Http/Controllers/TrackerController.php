@@ -13,7 +13,35 @@ class TrackerController extends Controller
      */
     public function index()
     {
-        return Inertia::render('data-visualization');
+        // $cars = array("Volvo", "BMW", "Toyota");
+
+        // return $cars;
+
+        // return response()->json([
+        //     'animal' => [
+        //         [
+        //             'id' => 1,
+        //             'name' => 'Harimau',
+        //         ],
+        //         [
+        //             'id' => 2,
+        //             'name' => 'Biawak',
+        //         ],
+        //     ],
+        //     'user' => [
+        //         [
+        //             'id' => 1,
+        //             'name' => 'Rembo',
+        //         ],
+        //         [
+        //             'id' => 2,
+        //             'name' => 'Amar',
+        //         ],
+        //     ]
+        // ]);
+        return Inertia::render('data-visualization' , [
+            'trackingData' => []
+        ]);
     }
 
     /**

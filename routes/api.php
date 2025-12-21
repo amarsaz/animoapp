@@ -5,8 +5,21 @@ use App\Http\Controllers\Api\GpsController;
 use App\Http\Controllers\Api\DataVisualizationController;
 use App\Http\Controllers\Api\CameraController;
 
-Route::post('/gps', [GpsController::class, 'store']);
-// Route::get('/data-visualization', [DataVisualizationController::class, 'index']);
+Route::get('/', function () {
+    return response()->json(
+        ['animo' => 'v1']
+    );
+});
 
-Route::post('/camera/detection', [CameraController::class, 'store']);
-Route::get('/camera/latest', [CameraController::class, 'latest']);
+// localhost:8000/api/camera/latest
+Route::prefix('gps')->group(function() {
+    Route::get('/latest', [GpsController::class, 'showLatestCoordinate']);
+    Route::post('/update-coordinate', [GpsController::class, 'store']);
+});
+
+
+
+// Route::get('/camera/detection', [CameraController::class, 'store']);
+// Route::get('/camera/latest', [CameraController::class, 'latest']);
+
+// 2.0222941666666667,15.318534

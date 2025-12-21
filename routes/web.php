@@ -38,14 +38,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 });
 
-Route::get('/api/tracker', [TrackerController::class, 'index']);
-Route::post('/api/tracker', [TrackerController::class, 'store']);
-Route::get('/api/tracker/store-dummy', [TrackerController::class, 'storeDummy']);
-
-Route::post('/gps', [GpsController::class, 'store']);
-
-Route::get('/camera/detection', [CameraController::class, 'store']);
-Route::get('/camera/latest', [CameraController::class, 'latest']);
+Route::get('/tracker', [TrackerController::class, 'index']);
+Route::post('/tracker', [TrackerController::class, 'store']);
+Route::get('/tracker/store-dummy', [TrackerController::class, 'storeDummy']);
 
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';

@@ -55,8 +55,8 @@ export default function DataVisualization() {
   const { trackingData } = usePage<{ trackingData: TrackingItem[] }>().props;
 
   // Prepare markers for the map
-  const markers = (trackingData || [])
-    .filter((data) => data.status === 'Active')
+  const markers = 
+    trackingData.filter((data) => data.status === 'Active')
     .map((data) => ({
       coordinates: [data.longitude, data.latitude] as [number, number],
       color: data.status === 'Active' ? '#22c55e' : '#ef4444',
