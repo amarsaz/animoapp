@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\GpsController;
 use App\Http\Controllers\Api\DataVisualizationController;
 use App\Http\Controllers\Api\CameraController;
+use App\Http\Controllers\DashboardController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -18,12 +19,7 @@ Route::get('/about', function () {
 })->name('about');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard', [
-            'tracker' => []
-        ]);
-    })->name('dashboard');
-    // http://127.0.0.1:8000/data-visualization
+    Route::get('dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
     Route::get('data-visualization', [TrackerController::class, 'index']);
 
     Route::get('schedule', function () {

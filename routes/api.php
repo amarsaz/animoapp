@@ -6,20 +6,18 @@ use App\Http\Controllers\Api\DataVisualizationController;
 use App\Http\Controllers\Api\CameraController;
 
 Route::get('/', function () {
-    return response()->json(
-        ['animo' => 'v1']
-    );
+    return response()->json(['animo' => 'v1']);
 });
 
-// localhost:8000/api/camera/latest
-Route::prefix('gps')->group(function() {
+// GPS routes
+Route::prefix('gps')->group(function () {
     Route::get('/coordinate/{id}', [GpsController::class, 'getDeviceLatestCoordinate']);
     Route::post('/update-coordinate', [GpsController::class, 'store']);
 });
 
+// CAMERA routes ✅
 
-
-// Route::get('/camera/detection', [CameraController::class, 'store']);
-// Route::get('/camera/latest', [CameraController::class, 'latest']);
-
-// 2.0222941666666667,15.318534
+Route::prefix('camera')->group(function () {
+    Route::post('/detection', [CameraController::class, 'store']);
+    Route::get('/latest', [CameraController::class, 'latest']);
+});

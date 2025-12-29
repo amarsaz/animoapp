@@ -20,7 +20,8 @@ type PageProps = {
   monthlyStats: MonthlyStat[];
 };
 
-export default function Dashboard() {
+
+export default function Dashboard({ detection }) {
   const { monthlyStats } = usePage<PageProps>().props;
 
   // 📌 Convert backend monthlyStats to chart format
@@ -124,7 +125,7 @@ export default function Dashboard() {
       <Head title="Dashboard" />
 
       <h1 className="text-lg font-bold m-4">Dashboard</h1>
-=
+
       {/* ⭐ TOP ROW */}
       <div className="w-full grid grid-cols-3 gap-4 mx-4">
         {/* Area Chart */}
@@ -135,17 +136,17 @@ export default function Dashboard() {
           <h2 className="text-xl font-bold mb-2">Latest Detection</h2>
           <p className="text-gray-500 mb-4">Showing the latest detection from the device</p>
 
-          {latest ? (
+          {detection ? (
             <>
               <img
-                src={animalImages[latest.animal]}
+                src={detection?.image}
                 className="rounded-xl w-full h-64 object-cover"
               />
               <p className="mt-3 text-lg">
-                <b>Animal:</b> {latest.animal}
+                <b>Animal:</b> {detection?.animal}
               </p>
               <p>
-                <b>Detected:</b> {new Date(latest.timestamp).toLocaleString()}
+                <b>Detected:</b> {new Date(detection?.timestamp).toLocaleString()}
               </p>
             </>
           ) : (

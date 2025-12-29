@@ -10,53 +10,70 @@ use Illuminate\Support\Facades\Mail;
 
 class CameraController extends Controller
 {
+    /**
+     * Store detection from RPi camera
+     * POST /api/camera/detection
+     */
     public function store(Request $request)
     {
-        // Validate input
+        // ✅ Validate input
         $request->validate([
-            'animal' => 'required|string',
+            'animal'     => 'required|string',
             'confidence' => 'required|numeric',
-            'image' => 'required|image',
+            'image'      => 'required|image',
         ]);
 
-        // Store image
+        // ✅ Store image
         $path = $request->file('image')->store('detections', 'public');
 
-        // Save detection
+        // ✅ Save detection to database
         $detection = Detection::create([
-            'animal' => strtolower($request->animal),
+            'animal'     => strtolower($request->animal),
             'confidence' => $request->confidence,
-            'image_path' => $path,
+            'image_path'=> $path,
         ]);
 
-        // // Email triggers
-        // $alertAnimals = ['tiger', 'elephant', 'orang utan'];
+        // ✅ EMAIL ALERT (enable when ready)
+        $alertAnimals = ['tiger', 'elephant', 'orang utan'];
 
-        // if (in_array($detection->animal, $alertAnimals)) {
-        //     Mail::to('amarsazx@gmail.com')->send(new AnimalDetectedAlert($detection));
-        // }
+        if (in_array($detection->animal, $alertAnimals)) {
+            Mail::to('amarsazx@gmail.com')
+                ->send(new AnimalDetectedAlert($detection));
+        }
 
-        return response()->json(['success' => true]);
+        return response()->json([
+            'success' => true,
+            'message' => 'Detection stored successfully',
+        ]);
     }
 
+    /**
+     * Get latest detection
+     * GET /api/camera/latest
+     */
     public function latest()
     {
-        $latest = Detection::orderBy('created_at', 'desc')->first();
+        $latest = Detection::latest()->first();
 
         if (!$latest) {
             return response()->json(null);
         }
 
         return response()->json([
-            'animal' => $latest->animal,
-            'timestamp' => $latest->created_at,
+            'animal'     => $latest->animal,
+            'confidence' => $latest->confidence,
+            'image'      => asset('storage/' . $latest->image_path),
+            'timestamp'  => $latest->created_at,
         ]);
     }
 
+    /**
+     * Activity level per animal (last 7 days)
+     * GET /api/camera/activity-levels
+     */
     public function activityLevels()
     {
         $animals = ['tiger', 'elephant', 'orang utan'];
-
         $result = [];
 
         foreach ($animals as $animal) {
