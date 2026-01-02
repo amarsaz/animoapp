@@ -11,4 +11,10 @@ class Detection extends Model
         'confidence',
         'image_path'
     ];
+     
+
+    public function getFullImageUrlAttribute()
+    {
+        return asset('storage/' . $this->image_path);
+    }
 }

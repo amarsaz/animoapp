@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\CameraResources;
 use Illuminate\Http\Request;
 use App\Models\Detection;
 use App\Mail\AnimalDetectedAlert;
@@ -33,19 +34,27 @@ class CameraController extends Controller
             'image_path'=> $path,
         ]);
 
-        // ✅ EMAIL ALERT (enable when ready)
+        // 🔥 EMAIL ALERT CONDITIONS
         $alertAnimals = ['tiger', 'elephant', 'orang utan'];
+        $minConfidence = 0.70;
 
-        if (in_array($detection->animal, $alertAnimals)) {
-            Mail::to('amarsazx@gmail.com')
-                ->send(new AnimalDetectedAlert($detection));
+        // ⏱ Anti-spam: 5 minutes cooldown
+        $recentAlert = Detection::where('animal', $detection->animal)
+            ->where('id', '!=', $detection->id)
+            ->where('created_at', '>=', now()->subMinutes(5))
+            ->exists();
+
+
+        if (
+            in_array($detection->animal, $alertAnimals) &&
+            $detection->confidence >= $minConfidence &&
+            !$recentAlert
+        ) {
+            Mail::to(config('mail.from.address'))
+                ->queue(new AnimalDetectedAlert($detection));
         }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Detection stored successfully',
-        ]);
     }
+
 
     /**
      * Get latest detection
@@ -101,4 +110,13 @@ class CameraController extends Controller
 
         return response()->json($result);
     }
+
+    public function history()
+    {
+        $data = Detection::limit(3)->orderBy('created_at','desc')->get();
+        return response()->json(CameraResources::collection($data));
+    }
+
+    //https://www.youtube.com/watch?v=cbHWpzBBwLw
+
 }

@@ -24,6 +24,17 @@ class GpsController extends Controller
         return response()->json($latestLocation);
     }
 
+    public function getDeviceCoordinateHistory($id)
+    {        
+        $latestLocation = DeviceLocation::where('device_id', $id)
+            ->latest('created_at')
+            ->limit(5)
+            ->get();
+
+                    
+        return response()->json($latestLocation);
+    }
+
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -45,71 +56,71 @@ class GpsController extends Controller
         $status = 'no_geofence';
         $distance = null;
 
-        if ($geofence) {
-            $distance = $this->haversine(
-                $data['lat'],
-                $data['lng'],
-                $geofence->center_lat,
-                $geofence->center_lng
-            );
+        // if ($geofence) {
+        //     $distance = $this->haversine(
+        //         $data['lat'],
+        //         $data['lng'],
+        //         $geofence->center_lat,
+        //         $geofence->center_lng
+        //     );
 
-           $status = ($distance <= $geofence->radius_m) ? 'inside' : 'outside';
+        //    $status = ($distance <= $geofence->radius_m) ? 'inside' : 'outside';
 
-            // ✅ Get previous location (for REAL transition detection)
-            $last = DeviceLocation::where('device_id', $data['device_id'])
-                ->latest()
-                ->first();
+        //     // ✅ Get previous location (for REAL transition detection)
+        //     $last = DeviceLocation::where('device_id', $data['device_id'])
+        //         ->latest()
+        //         ->first();
 
-            $shouldAlert = false;
+        //     $shouldAlert = false;
 
-            if ($last && $last->status === 'inside' && $status === 'outside') {
-            $shouldAlert = true;
-            }
+        //     if ($last && $last->status === 'inside' && $status === 'outside') {
+        //     $shouldAlert = true;
+        //     }
 
-            // ✅ Save new GPS status
-            $location->status = $status;
-            $location->distance_m = round($distance, 2);
-            $location->save();
+        //     // ✅ Save new GPS status
+        //     $location->status = $status;
+        //     $location->distance_m = round($distance, 2);
+        //     $location->save();
 
-            /**
-             * ✅ REAL EXIT-ONLY GEOFENCE ALERT
-             */
-            $last = DeviceLocation::where('device_id', $data['device_id'])
-                ->latest()
-                ->skip(1)
-                ->first();
+        //     /**
+        //      * ✅ REAL EXIT-ONLY GEOFENCE ALERT
+        //      */
+        //     $last = DeviceLocation::where('device_id', $data['device_id'])
+        //         ->latest()
+        //         ->skip(1)
+        //         ->first();
 
-            $shouldAlert = false;
+        //     $shouldAlert = false;
 
-            if ($last && $last->status === 'inside' && $status === 'outside') {
-                $shouldAlert = true;
-            }
+        //     if ($last && $last->status === 'inside' && $status === 'outside') {
+        //         $shouldAlert = true;
+        //     }
 
-            if ($shouldAlert) {
-                Mail::to('amarsazx@gmail.com')->send(
-                    new GeofenceAlertMail(
-                        $data['device_id'],
-                        $data['lat'],
-                        $data['lng'],
-                        round($distance, 2)
-                    )
-                );
-            }
+        //     if ($shouldAlert) {
+        //         Mail::to('amarsazx@gmail.com')->send(
+        //             new GeofenceAlertMail(
+        //                 $data['device_id'],
+        //                 $data['lat'],
+        //                 $data['lng'],
+        //                 round($distance, 2)
+        //             )
+        //         );
+        //     }
 
-            // ✅ REAL GEOFENCE ALERT (NO SPAM)
-            $shouldAlert = false;
+        //     // ✅ REAL GEOFENCE ALERT (NO SPAM)
+        //     $shouldAlert = false;
 
-            // Trigger only when device exits the safe zone
-            if ($status === 'outside') {
-            $shouldAlert = true;
-            }
+        //     // Trigger only when device exits the safe zone
+        //     if ($status === 'outside') {
+        //     $shouldAlert = true;
+        //     }
 
-            if ($shouldAlert) {
-            Log::alert("🚨 GEOFENCE BREACH: {$data['device_id']} exited the safe zone!");
-            }
+        //     if ($shouldAlert) {
+        //     Log::alert("🚨 GEOFENCE BREACH: {$data['device_id']} exited the safe zone!");
+        //     }
 
 
-        }
+        // }
 
         return response()->json([
             'success'     => true,

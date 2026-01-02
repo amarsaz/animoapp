@@ -112,6 +112,27 @@ export default function Dashboard({ detection }) {
     }
   };
 
+  //1. State untuk hold value daripada response api bawah.
+  const [history, setHistory] = useState([])
+
+  //2. Api call detection history
+  const getDetectionHistory = async () => 
+  {
+     try {
+      const res = await axios.get('api/camera/detectionhistory');
+      const data = res.data;
+
+      // Pegang value daripada response api call (history)
+      setHistory(res.data)
+     }catch(err){
+      console.log('Error', err)
+     }
+
+  }
+  useEffect(() => {
+    getDetectionHistory()
+  }, [])
+
   // ⭐ Auto-refresh every 10 seconds
   useEffect(() => {
     // loadLatest();
@@ -172,23 +193,26 @@ export default function Dashboard({ detection }) {
         <TotalDetectionChart data={areaChartData} />
 
         {/* ⭐ Detection Device Card */}
+
         <div className="p-4 bg-white shadow rounded-xl border">
           <h2 className="font-semibold text-lg">Detection Device</h2>
-          {latest ? (
-            <div className="flex items-center gap-4 mt-3">
-              <img
-                src={animalImages[latest.animal]}
-                className="w-16 h-16 rounded-lg object-cover"
-              />
-              <div>
-                <p><b>Device:</b> Raspberry Pi 5</p>
-                <p><b>Animal:</b> {latest.animal}</p>
-                <p><b>Time:</b> {new Date(latest.timestamp).toLocaleTimeString()}</p>
+
+          {history.map((h) => (
+            <>
+              <div className="flex items-center gap-4 mt-3">
+                <img
+                  src={h.image_path}
+                  className="w-16 h-16 rounded-lg object-cover"
+                />
+                <div>
+                  <p><b>Device:</b> Raspberry Pi 5</p>
+                  <p><b>Animal:</b> {h.animal}</p>
+                  <p><b>Time:</b> {new Date(h.created_at).toLocaleString()}</p>
+                  <p><b>Confidence:</b> {h.confidence}</p>
+                </div>
               </div>
-            </div>
-          ) : (
-            <p className="text-gray-500">Waiting for detection...</p>
-          )}
+            </>
+            ))}
         </div>
 
         {/* Keep your existing tracking component */}

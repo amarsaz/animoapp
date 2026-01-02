@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import {
   Card,
@@ -6,81 +6,98 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@/components/ui/card"
+import { Bot } from "lucide-react"
+import { useEffect, useState } from "react"
+import axios from "axios"
 
-import { useEffect, useState } from "react";
+const REFRESH_INTERVAL = 120000 // 2 minutes
+const MAX_CARDS = 3
+
+type DetectionData = {
+  animal: string
+  confidence: number
+  created_at: string
+}
 
 export function DetectionDevice() {
-  const [latest, setLatest] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [detections, setDetections] = useState<DetectionData[]>([])
 
-  const fetchLatest = async () => {
+  const loadLatestDetection = async () => {
     try {
-      const res = await fetch("/api/camera/latest");
-      const data = await res.json();
-      setLatest(data);
+      const res = await axios.get("/api/detection/latest")
+      const latest: DetectionData = res.data
+
+      setDetections((prev) => {
+        // Prevent duplicate insert (same timestamp)
+        if (prev[0]?.created_at === latest.created_at) {
+          return prev
+        }
+
+        const updated = [latest, ...prev]
+        return updated.slice(0, MAX_CARDS)
+      })
     } catch (err) {
-      console.error("Error fetching detection:", err);
-    } finally {
-      setLoading(false);
+      console.error("Failed to fetch detection")
     }
-  };
+  }
 
   useEffect(() => {
-    fetchLatest();
-    const interval = setInterval(fetchLatest, 120000); // every 2 minutes
-    return () => clearInterval(interval);
-  }, []);
+    loadLatestDetection()
 
-  // 🦁 Map animal → images in /public/detections/
-  const getImagePath = (animal: string) => {
-    return `/detections/${animal}.jpeg`; // elephant.jpeg, tiger.jpeg, orang utan.jpeg
-  };
+    const interval = setInterval(() => {
+      loadLatestDetection()
+    }, REFRESH_INTERVAL)
+
+    return () => clearInterval(interval)
+  }, [])
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Detection Device</CardTitle>
         <CardDescription>
-          Showing the latest detection of animal from camera device.
+          Latest detections from Raspberry Pi 5
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="space-y-2">
-        {loading ? (
-          <p className="text-gray-500">Loading...</p>
-        ) : !latest ? (
-          <p className="text-gray-500">No detection yet</p>
-        ) : (
-          <Card>
+      <CardContent className="space-y-3">
+        {detections.length === 0 && (
+          <p className="text-muted-foreground">
+            Waiting for detection...
+          </p>
+        )}
+
+        {detections.map((d, index) => (
+          <Card key={d.created_at}>
             <CardContent>
               <div className="flex gap-4 items-center">
-                {/* LEFT TEXT */}
-                <div className="flex flex-col flex-1 min-w-0">
-                  <h3 className="font-semibold text-base truncate">
-                    Camera 9 {/* static name or we can dynamic later */}
-                  </h3>
+                <div className="w-10 h-10 bg-gray-900 rounded-full flex items-center justify-center">
+                  <Bot className="w-5 h-5 text-white" />
+                </div>
 
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {new Date(latest.timestamp).toLocaleString()}
+                <div className="flex-1">
+                  <p className="font-semibold text-sm">
+                    Raspberry Pi 5
+                  </p>
+
+                  <p className="text-sm">
+                    Animal: <b>{d.animal}</b>
+                  </p>
+
+                  <p className="text-xs text-muted-foreground">
+                    Confidence: {(d.confidence * 100).toFixed(1)}%
                   </p>
                 </div>
 
-                {/* RIGHT IMAGE */}
-                <div className="flex-shrink-0">
-                  <div className="relative w-20 h-20 rounded-lg overflow-hidden border-2 border-gray-200">
-                    <img
-                      src={getImagePath(latest.animal)}
-                      alt={latest.animal}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                </div>
+                <span className="text-xs text-muted-foreground whitespace-nowrap">
+                  {new Date(d.created_at).toLocaleTimeString()}
+                </span>
               </div>
             </CardContent>
           </Card>
-        )}
+        ))}
       </CardContent>
     </Card>
-  );
+  )
 }

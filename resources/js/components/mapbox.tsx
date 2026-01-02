@@ -1,109 +1,112 @@
-import React, { useEffect, useRef, useState } from 'react';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import React, { useEffect, useRef } from 'react'
+import mapboxgl from 'mapbox-gl'
+import 'mapbox-gl/dist/mapbox-gl.css'
 
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
 
+type MarkerData = {
+  coordinates: [number, number]
+  color?: string
+  popup?: string
+}
+
 export default function Mapbox({
   accessToken,
-  center = [103.08202365213722, 1.8575466636735622] as [number, number], // Updated coordinates
-  zoom = 2,
+  center = [103.08202365213722, 1.8575466636735622],
+  zoom = 13,
   style = 'mapbox://styles/mapbox/streets-v12',
   markers = [],
   onMapLoaded = () => {},
-  onMarkerClick = () => {}
+  onMarkerClick = () => {},
 }: {
-  accessToken: string;
-  center?: [number, number];
-  zoom?: number;
-  style?: string;
-  markers?: any[];
-  onMapLoaded?: (map: mapboxgl.Map) => void;
-  onMarkerClick?: (marker: any) => void;
+  accessToken: string
+  center?: [number, number]
+  zoom?: number
+  style?: string
+  markers?: MarkerData[]
+  onMapLoaded?: (map: mapboxgl.Map) => void
+  onMarkerClick?: (marker: MarkerData) => void
 }) {
-  const mapContainer = useRef<HTMLDivElement | null>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const markersRef = useRef([]);
+  const mapContainer = useRef<HTMLDivElement | null>(null)
+  const mapRef = useRef<mapboxgl.Map | null>(null)
+  const markersRef = useRef<mapboxgl.Marker[]>([])
 
-  // Initialize map
+  // ✅ Init map (client-only)
   useEffect(() => {
-    if (map.current) return; // Initialize only once
+    if (typeof window === 'undefined') return
+    if (!mapContainer.current || mapRef.current) return
 
-    mapboxgl.accessToken = accessToken;
+    mapboxgl.accessToken = accessToken
 
-    map.current = new mapboxgl.Map({
+    mapRef.current = new mapboxgl.Map({
       container: mapContainer.current,
-      style: style,
-      center: center,
-      zoom: zoom
-    });
+      style,
+      center,
+      zoom,
+    })
 
-    // Add navigation controls
-    map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+    mapRef.current.addControl(
+      new mapboxgl.NavigationControl(),
+      'top-right'
+    )
 
-    map.current.on('load', () => {
-      if (map.current) {
-        onMapLoaded(map.current);
-      }
-    });
+    mapRef.current.on('load', () => {
+      onMapLoaded(mapRef.current!)
+    })
 
     return () => {
-      if (map.current) {
-        map.current.remove();
-      }
-    };
-  }, []);
+      mapRef.current?.remove()
+      mapRef.current = null
+    }
+  }, [accessToken])
 
-  // Fly to center when center prop changes
+  // ✅ Fly to new center
   useEffect(() => {
-    if (!map.current) return;
+    if (!mapRef.current) return
 
-    map.current.flyTo({
-      center: center,
-      zoom: zoom,
-      essential: true
-    });
-  }, [center, zoom]);
+    mapRef.current.flyTo({
+      center,
+      zoom,
+      essential: true,
+    })
+  }, [center, zoom])
 
-  // Update markers
+  // ✅ Update markers
   useEffect(() => {
-    if (!map.current) return;
+    if (!mapRef.current) return
 
-    // Clear existing markers
-    markersRef.current.forEach(marker => marker.remove());
-    markersRef.current = [];
+    markersRef.current.forEach(m => m.remove())
+    markersRef.current = []
 
-    // Add new markers
-    markers.forEach((markerData) => {
+    markers.forEach(markerData => {
       const marker = new mapboxgl.Marker({
-        color: markerData.color || '#FF0000'
+        color: markerData.color ?? '#FF0000',
       })
         .setLngLat(markerData.coordinates)
-        .addTo(map.current);
+        .addTo(mapRef.current!)
 
       if (markerData.popup) {
-        const popup = new mapboxgl.Popup({ offset: 25 })
-          .setHTML(markerData.popup);
-        marker.setPopup(popup);
+        marker.setPopup(
+          new mapboxgl.Popup({ offset: 25 }).setHTML(markerData.popup)
+        )
       }
 
       marker.getElement().addEventListener('click', () => {
-        onMarkerClick(markerData);
-      });
+        onMarkerClick(markerData)
+      })
 
-      markersRef.current.push(marker);
-    });
-  }, [markers]);
+      markersRef.current.push(marker)
+    })
+  }, [markers])
 
   return (
-        <Card className="flex flex-col h-full">
+    <Card className="flex flex-col h-full">
       <CardHeader>
         <CardTitle>Latest detection</CardTitle>
         <CardDescription>
@@ -111,16 +114,13 @@ export default function Mapbox({
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="flex-1 p-0 pb-6 px-6">
-            <div
-                ref={mapContainer}
-                className="mapbox-container h-full w-full rounded-lg"
-                style={{
-                    minHeight: '300px'
-                }}
-            />
+      <CardContent className="flex-1 p-0 px-6 pb-6">
+        <div
+          ref={mapContainer}
+          className="h-full w-full rounded-lg"
+          style={{ minHeight: '300px' }}
+        />
       </CardContent>
     </Card>
-
-  );
+  )
 }
