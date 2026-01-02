@@ -118,7 +118,7 @@ export default function Mapbox({
         <div
           ref={mapContainer}
           className="h-full w-full rounded-lg"
-          style={{ minHeight: '300px' }}
+          style={{ minHeight: '500px' }}
         />
       </CardContent>
     </Card>

@@ -136,10 +136,10 @@ export default function DataVisualization() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {trackingData.filter((d) => d.status === 'Active').length}
+                1
               </div>
               <p className="text-xs text-muted-foreground">
-                of {trackingData.length} total devices
+                of 1 total devices 
               </p>
             </CardContent>
           </Card>
@@ -224,78 +224,7 @@ export default function DataVisualization() {
           </Card>
         </div>
 
-        {/* Tracking Data Table */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Tracking Device Data</CardTitle>
-            <CardDescription>Real-time location and status information</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Device ID</TableHead>
-                  <TableHead>Animal</TableHead>
-                  <TableHead>Location</TableHead>
-                  <TableHead>Last Update</TableHead>
-                  <TableHead>Battery</TableHead>
-                  <TableHead>Signal</TableHead>
-                  <TableHead>Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {trackingData.map((data) => (
-                  <TableRow key={data.id}>
-                    <TableCell className="font-medium">
-                      {data.deviceId}
-                    </TableCell>
-                    <TableCell>{data.animalName}</TableCell>
-                    <TableCell className="text-sm">
-                      <div>
-                        {data.latitude.toFixed(4)}, {data.longitude.toFixed(4)}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-sm">
-                      <div>{data.date}</div>
-                      <div className="text-gray-500">{data.time}</div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={
-                          parseInt(data.battery) > 50 ? 'default' : 'destructive'
-                        }
-                      >
-                        {data.battery}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={
-                          data.signalStrength === 'Strong'
-                            ? 'default'
-                            : data.signalStrength === 'Medium'
-                            ? 'secondary'
-                            : 'outline'
-                        }
-                      >
-                        {data.signalStrength}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={
-                          data.status === 'Active' ? 'default' : 'secondary'
-                        }
-                      >
-                        {data.status}
-                      </Badge>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+        
       </div>
     </AppLayout>
   );

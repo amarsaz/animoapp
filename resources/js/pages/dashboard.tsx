@@ -6,7 +6,13 @@ import { type BreadcrumbItem } from '@/types';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { TrackingDevice } from '@/components/tracking-device';
-
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 const breadcrumbs: BreadcrumbItem[] = [
   { title: 'Dashboard', href: '/dashboard' },
 ];
@@ -148,11 +154,23 @@ export default function Dashboard({ detection }) {
       <h1 className="text-lg font-bold m-4">Dashboard</h1>
 
       {/* ⭐ TOP ROW */}
-      <div className="w-full grid grid-cols-3 gap-4 mx-4">
+      <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-2">
         {/* Area Chart */}
-        <TotalDetectionChart data={areaChartData} />
-
+        {/* <TotalDetectionChart data={areaChartData} /> */}
+        {/* Mapbox */}
+        <MapboxComponent
+          accessToken="pk.eyJ1IjoiYW1hcnNheiIsImEiOiJjbWdiMzljcDEwZDJtMnBwazU0N29oeDF6In0.STcvu9bAbkxnFWtglzjpiw"
+          center={
+            markers.length > 0
+              ? markers[0].coordinates
+              : [103.08202365213722, 1.8575466636735622]
+          }
+          zoom={13}
+          markers={markers}
+        />
         {/* ⭐ Latest Detection Card */}
+
+        {/* Keep your existing tracking component */}
         <div className="p-5 bg-white shadow rounded-xl border">
           <h2 className="text-xl font-bold mb-2">Latest Detection</h2>
           <p className="text-gray-500 mb-4">Showing the latest detection from the device</p>
@@ -174,50 +192,40 @@ export default function Dashboard({ detection }) {
             <p>No detection yet...</p>
           )}
         </div>
-
-        {/* Mapbox */}
-        <MapboxComponent
-          accessToken="pk.eyJ1IjoiYW1hcnNheiIsImEiOiJjbWdiMzljcDEwZDJtMnBwazU0N29oeDF6In0.STcvu9bAbkxnFWtglzjpiw"
-          center={
-            markers.length > 0
-              ? markers[0].coordinates
-              : [103.08202365213722, 1.8575466636735622]
-          }
-          zoom={13}
-          markers={markers}
-        />
-      </div>
-
-      {/* ⭐ BOTTOM ROW */}
-      <div className="w-full grid grid-cols-3 gap-4 m-4">
-        <TotalDetectionChart data={areaChartData} />
-
-        {/* ⭐ Detection Device Card */}
+        <TrackingDevice />
 
         <div className="p-4 bg-white shadow rounded-xl border">
           <h2 className="font-semibold text-lg">Detection Device</h2>
 
           {history.map((h) => (
             <>
-              <div className="flex items-center gap-4 mt-3">
-                <img
-                  src={h.image_path}
-                  className="w-16 h-16 rounded-lg object-cover"
-                />
-                <div>
-                  <p><b>Device:</b> Raspberry Pi 5</p>
-                  <p><b>Animal:</b> {h.animal}</p>
-                  <p><b>Time:</b> {new Date(h.created_at).toLocaleString()}</p>
-                  <p><b>Confidence:</b> {h.confidence}</p>
+              <Card className="w-full p-4">
+                <div className="flex items-center justify-between gap-4">
+                  {/* Left content */}
+                  <div className="space-y-1">
+                    <p><b>Device:</b> Raspberry Pi 5</p>
+                    <p><b>Animal:</b> {h.animal}</p>
+                    <p><b>Time:</b> {new Date(h.created_at).toLocaleString()}</p>
+                    <p><b>Confidence:</b> {h.confidence}</p>
+                  </div>
+
+                  {/* Right image */}
+                  <img
+                    src={h.image_path}
+                    alt="Animal"
+                    className="w-20 h-20 rounded-xl object-cover border"
+                  />
                 </div>
-              </div>
+              </Card>
+
             </>
             ))}
         </div>
 
-        {/* Keep your existing tracking component */}
-        <TrackingDevice />
+
       </div>
+
+
     </AppLayout>
   );
 }

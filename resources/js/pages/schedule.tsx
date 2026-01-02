@@ -35,6 +35,10 @@ const BASE_DATA = {
       { icon: Moon, time: "05:00–07:00" },
     ],
     seasonalPattern: "Year-round",
+    level:14,
+    level_type: 'Low',
+    color: 'green'
+
   },
 
   elephant: {
@@ -45,6 +49,9 @@ const BASE_DATA = {
       { icon: Sun, time: "16:00–20:00" },
     ],
     seasonalPattern: "Dry season peak",
+    level: 53,
+    level_type: 'Medium',
+    color: 'yellow'
   },
 
   "orang utan": {
@@ -55,6 +62,10 @@ const BASE_DATA = {
       { icon: Moon, time: "18:00–21:00" },
     ],
     seasonalPattern: "Fruit season peak",
+    level:79,
+    level_type: 'Low',
+    color: 'red'
+
   },
 } as const;
 
@@ -149,15 +160,7 @@ export default function Schedule() {
 
                     {/* ⭐ Activity Level + Confidence Display ⭐ */}
                     <div className="flex gap-2">
-                      <Badge className={colorToClass(live?.color) + " text-white"}>
-                        {live?.level || "Loading..."}
-                      </Badge>
 
-                      <Badge variant="outline" className="border-gray-300">
-                        {live?.confidence !== null && live?.confidence !== undefined
-                          ? `${live.confidence}% Confidence`
-                          : "Waiting..."}
-                      </Badge>
                     </div>
                   </div>
                 </CardHeader>
@@ -202,14 +205,14 @@ export default function Schedule() {
                       <div className="w-full h-2 bg-gray-200 rounded relative overflow-hidden">
                         <div
                           className={`h-full rounded transition-all duration-500 ${colorToClass(
-                            live?.color
+                            data?.color
                           )}`}
-                          style={{ width: `${levelToValue(live?.level)}%` }}
+                          style={{ width: `${data?.level}%` }}
                         />
                       </div>
 
                       <p className="text-right text-sm text-gray-700 mt-1">
-                        {live?.level || "Loading..."}
+                        {data?.level + ' %' || "Loading..."} 
                       </p>
 
                       {/* Optional timestamp */}
